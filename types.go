@@ -8,3 +8,9 @@ type StatuePunk struct {
 	Statue string `json:"status"`
 	Type   string `json:"type"`
 }
+
+type PemPunk struct {
+	IP        string `json:"ip"`
+	Wal       string `json:"wal"`
+	WalPriKey string `json:"walPriKey"`
+}
