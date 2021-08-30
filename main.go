@@ -127,7 +127,7 @@ func prepareEnv() error {
 	dfx, err := exec.LookPath("dfx")
 	if err != nil || dfx == "" {
 		//need download
-		cmd := exec.Command("bash", "-c", "sh -ci $(curl -fsSL https://sdk.dfinity.org/install.sh)")
+		cmd := exec.Command("sh -ci $(curl -fsSL https://sdk.dfinity.org/install.sh)")
 		data, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Fatalf("failed to call pipeCommands(): %v", err)
