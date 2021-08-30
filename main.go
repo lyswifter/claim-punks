@@ -68,6 +68,10 @@ func main() {
 		}
 	}()
 
+	DataStores()
+
+	SetupFSM()
+
 	ip, erra := GetClientIp()
 	if erra != nil {
 		return
