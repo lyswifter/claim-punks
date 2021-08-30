@@ -1,5 +1,7 @@
 SHELL=/usr/bin/env bash
 
+GOCC?=go
+
 .PHONY: clean
 clean:
 	rm claim-punk
@@ -7,3 +9,6 @@ clean:
 .PHONY: all
 all:
 	go build -o claim-punk *.go
+
+type-gen: 
+	$(GOCC) run ./gen/main.go

@@ -1,4 +1,4 @@
-package main
+package fsm
 
 import (
 	"log"
@@ -26,16 +26,29 @@ func (ic *ICPunks) Plan(events []statemachine.Event, user interface{}) (interfac
 }
 
 var fsmPlanners = map[TaskState]func(events []statemachine.Event, state *TaskInfo) (uint64, error){
+	UndefinedSectorState: planOne(
+		on(TaskStart{}, Processing),
+	),
 	Start: planOne(
 		on(TaskStart{}, Processing),
+	),
+	Processing: planOne(
 		on(TaskSuccessed{}, Finished),
-		on(TaskFailed{}, Start),
+		on(TaskFailed{}, Failed),
+	),
+	Successed: planOne(
+		on(TaskSuccessed{}, Finished),
+	),
+	Failed: planOne(
+		on(TaskStart{}, Start),
 	),
 }
 
 func (ic *ICPunks) plan(events []statemachine.Event, state *TaskInfo) (func(statemachine.Context, TaskInfo) error, uint64, error) {
 	/////
 	// First process all events
+
+	log.Printf("State: %s", state.State)
 
 	p := fsmPlanners[state.State]
 	if p == nil {

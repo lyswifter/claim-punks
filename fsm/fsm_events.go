@@ -1,4 +1,4 @@
-package main
+package fsm
 
 type mutator interface {
 	apply(state *TaskInfo)
@@ -16,11 +16,13 @@ type Ignorable interface {
 }
 
 type TaskStart struct {
+	ID     TaskNumber
 	IP     string
 	Wallet string
 }
 
 func (evt TaskStart) apply(state *TaskInfo) {
+	state.ID = evt.ID
 	state.IP = evt.IP
 	state.Wallet = evt.Wallet
 }
@@ -33,8 +35,16 @@ func (evt TaskSuccessed) apply(state *TaskInfo) {
 	state.TokenID = evt.TokenID
 }
 
-type TaskFailed struct {
-}
+type TaskFailed struct{ error }
 
 func (evt TaskFailed) apply(state *TaskInfo) {
+	state.TokenID = ""
+}
+
+type TaskFinished struct {
+	TokenID string
+}
+
+func (evt TaskFinished) apply(state *TaskInfo) {
+	state.TokenID = evt.TokenID
 }
