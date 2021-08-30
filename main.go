@@ -10,7 +10,8 @@ import (
 	"time"
 )
 
-const wallet_count = 100
+var wallet_count = 100
+var destTiming = "2021-09-01 20:00:00"
 
 var gdfx = ""
 var home = ""
@@ -145,8 +146,8 @@ func prepareEnv() error {
 	}
 
 	gdfx = dfx
-	log.Printf("dfx cmd is ok: %s", gdfx)
 
+	log.Printf("dfx cmd is ok: %s", gdfx)
 	return nil
 }
 
@@ -281,25 +282,32 @@ func cmdFunc(wl string) {
 
 func tigger() error {
 	timeFormat := "2006-01-02 15:04:05"
-	destTime, err := time.ParseInLocation(timeFormat, "2021-08-28 10:22:24", time.UTC)
+	destTime, err := time.ParseInLocation(timeFormat, destTiming, time.UTC)
 	if err != nil {
 		return err
 	}
 
 	delay := destTime.Sub(time.Now().UTC())
+
 	log.Printf("time is not reached dest: %v nowUtc: %v now: %v delay: %v", destTime, time.Now().UTC(), time.Now(), delay)
 
 	timer := time.NewTimer(delay)
-	tickerOne := time.NewTicker(30 * time.Second)
+	tickerOne := time.NewTicker(10 * time.Second)
 
 nextStep:
 	for {
 		select {
 		case <-timer.C:
-			log.Printf("it's time now todo sth")
+			log.Printf("It's time now to do sth")
 			break nextStep
 		case <-tickerOne.C:
-			log.Printf("I am running")
+			go func() error {
+				err := reportStatus("waiting time", statOk)
+				if err != nil {
+					return err
+				}
+				return nil
+			}()
 		}
 	}
 
@@ -352,7 +360,6 @@ loop:
 			if len(PunksInHand) == len(wallets) {
 				break loop
 			}
-
 		case re := <-remainChan:
 			log.Printf("Temp encounter problem: %s err: %s", re.wal, re.Err.Error())
 		case <-ticker.C:
