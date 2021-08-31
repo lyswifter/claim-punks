@@ -62,6 +62,15 @@ func DataStores() {
 func saveinfo(info ResultPunk) error {
 	key := datastore.NewKey(info.Wal)
 
+	ishas, err := DB.Has(key)
+	if err != nil {
+		return err
+	}
+
+	if ishas {
+		return xerrors.New("is exist")
+	}
+
 	in, err := json.Marshal(info)
 	if err != nil {
 		return err

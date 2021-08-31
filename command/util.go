@@ -2,8 +2,21 @@ package command
 
 import (
 	"errors"
+	"io/ioutil"
 	"net"
+	"net/http"
 )
+
+func GetExternalIp() string {
+	resp, err := http.Get("http://myexternalip.com/raw")
+	if err != nil {
+		return ""
+	}
+
+	defer resp.Body.Close()
+	content, _ := ioutil.ReadAll(resp.Body)
+	return string(content)
+}
 
 func GetClientIp() (string, error) {
 	addrs, err := net.InterfaceAddrs()

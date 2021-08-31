@@ -29,6 +29,8 @@ var DaemonCmd = &cli.Command{
 		}
 		ClientIP = ip
 
+		ExClientIP = GetExternalIp()
+
 		err = prepareEnv()
 		if err != nil {
 			return err
