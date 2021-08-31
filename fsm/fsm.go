@@ -49,7 +49,7 @@ func (ic *ICPunks) plan(events []statemachine.Event, state *TaskInfo) (func(stat
 	/////
 	// First process all events
 
-	log.Printf("Task: %v State: %s", state.ID, state.State)
+	log.Printf("1 Task: %v State: %s", state.ID, state.State)
 
 	p := fsmPlanners[state.State]
 	if p == nil {
@@ -64,7 +64,7 @@ func (ic *ICPunks) plan(events []statemachine.Event, state *TaskInfo) (func(stat
 		}
 	}
 
-	log.Printf("Task: %v State: %s", state.ID, state.State)
+	log.Printf("2 Task: %v State: %s", state.ID, state.State)
 
 	processed, err := p(events, state)
 	if err != nil {

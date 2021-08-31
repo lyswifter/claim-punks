@@ -12,6 +12,7 @@ import (
 
 var wallets = []string{}
 var ClientIP string = ""
+var ExternalClientIP string = ""
 
 var PunksInHand = []ResultPunk{}
 

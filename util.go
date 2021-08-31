@@ -2,13 +2,26 @@ package main
 
 import (
 	"errors"
+	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
 )
+
+func GetExternalIp() string {
+	resp, err := http.Get("http://myexternalip.com/raw")
+	if err != nil {
+		return ""
+	}
+
+	defer resp.Body.Close()
+	content, _ := ioutil.ReadAll(resp.Body)
+	return string(content)
+}
 
 func GetClientIp() (string, error) {
 	addrs, err := net.InterfaceAddrs()
@@ -48,6 +61,12 @@ func EnvThing() error {
 	}
 	err = erra
 	ClientIP = ip
+
+	eip := GetExternalIp()
+	ExternalClientIP = eip
+
+	log.Printf("ExternalClientIP: %s", ExternalClientIP)
+	log.Printf("ClientIP: %s", ClientIP)
 
 	err = prepareEnv()
 	if err != nil {
