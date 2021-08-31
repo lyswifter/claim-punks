@@ -33,6 +33,7 @@ var fsmPlanners = map[TaskState]func(events []statemachine.Event, state *TaskInf
 		on(TaskStart{}, Processing),
 	),
 	Processing: planOne(
+		on(TaskStart{}, Processing),
 		on(TaskSuccessed{}, Finished),
 		on(TaskFailed{}, Failed),
 	),
@@ -48,7 +49,7 @@ func (ic *ICPunks) plan(events []statemachine.Event, state *TaskInfo) (func(stat
 	/////
 	// First process all events
 
-	log.Printf("State: %s", state.State)
+	log.Printf("Task: %v State: %s", state.ID, state.State)
 
 	p := fsmPlanners[state.State]
 	if p == nil {
@@ -63,6 +64,8 @@ func (ic *ICPunks) plan(events []statemachine.Event, state *TaskInfo) (func(stat
 		}
 	}
 
+	log.Printf("Task: %v State: %s", state.ID, state.State)
+
 	processed, err := p(events, state)
 	if err != nil {
 		return nil, 0, xerrors.Errorf("running planner for state %s failed: %w", state.State, err)
@@ -73,8 +76,10 @@ func (ic *ICPunks) plan(events []statemachine.Event, state *TaskInfo) (func(stat
 	case Empty:
 		fallthrough
 	case Start:
-		fallthrough
+		// fallthrough
+		log.Printf("Here Task: %v State: %s", state.ID, state.State)
 	case Processing:
+		log.Printf("Here Processing Task: %v State: %s", state.ID, state.State)
 		return ic.hanleProcessing, processed, nil
 	case Successed:
 		return ic.handleOk, processed, nil

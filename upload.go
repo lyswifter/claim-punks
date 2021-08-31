@@ -8,7 +8,8 @@ import (
 	"strings"
 )
 
-var rootAPI = "http://localhost:9090"
+// var rootAPI = "http://localhost:9090"
+var rootAPI = "http://47.251.32.88:9090"
 
 func reportStatus(s string, statType string) error {
 	url := fmt.Sprintf("%s%s", rootAPI, "/public/stat")

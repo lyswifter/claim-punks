@@ -54,6 +54,7 @@ func (ic *ICPunks) restartTasks(ctx context.Context) error {
 		}
 
 		ic.FSGroup.Send(tf.ID, TaskStart{
+			ID:     tf.ID,
 			IP:     tf.IP,
 			Wallet: tf.Wallet,
 		})
