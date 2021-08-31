@@ -27,7 +27,7 @@ func (ic *ICPunks) Plan(events []statemachine.Event, user interface{}) (interfac
 
 var fsmPlanners = map[TaskState]func(events []statemachine.Event, state *TaskInfo) (uint64, error){
 	UndefinedSectorState: planOne(
-		on(TaskStart{}, Processing),
+		on(TaskStart{}, Start),
 	),
 	Start: planOne(
 		on(TaskStart{}, Processing),
@@ -36,12 +36,12 @@ var fsmPlanners = map[TaskState]func(events []statemachine.Event, state *TaskInf
 		on(TaskSuccessed{}, Finished),
 		on(TaskFailed{}, Failed),
 	),
-	Successed: planOne(
-		on(TaskSuccessed{}, Finished),
-	),
-	Failed: planOne(
-		on(TaskStart{}, Start),
-	),
+	// Successed: planOne(
+	// 	on(TaskSuccessed{}, Finished),
+	// ),
+	// Failed: planOne(
+	// 	on(TaskStart{}, Start),
+	// ),
 }
 
 func (ic *ICPunks) plan(events []statemachine.Event, state *TaskInfo) (func(statemachine.Context, TaskInfo) error, uint64, error) {
@@ -73,6 +73,8 @@ func (ic *ICPunks) plan(events []statemachine.Event, state *TaskInfo) (func(stat
 	case Empty:
 		fallthrough
 	case Start:
+		fallthrough
+	case Processing:
 		return ic.hanleProcessing, processed, nil
 	case Successed:
 		return ic.handleOk, processed, nil

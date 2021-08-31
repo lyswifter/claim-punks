@@ -30,7 +30,6 @@ func main() {
 	}
 
 	DataStores()
-
 	icpunk := fsm.SetupFSM(DB, repoPath, workDir, projectName)
 
 	icpunk.Run(ctx)

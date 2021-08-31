@@ -22,6 +22,8 @@ type TaskStart struct {
 }
 
 func (evt TaskStart) apply(state *TaskInfo) {
+	// log.Printf("TaskStart.apply: %+v", state)
+
 	state.ID = evt.ID
 	state.IP = evt.IP
 	state.Wallet = evt.Wallet

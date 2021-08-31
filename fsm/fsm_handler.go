@@ -27,7 +27,7 @@ func (ic *ICPunks) Tigger(ctx context.Context, wallets []string, ip string) erro
 			continue
 		}
 
-		log.Printf("start task: %d wlt: %s", i, wlt)
+		log.Printf("start task: %d wlt: %s ip: %s", i, wlt, ip)
 
 		task := TaskStart{
 			ID:     TaskNumber(i),
@@ -63,6 +63,8 @@ func (ic *ICPunks) restartTasks(ctx context.Context) error {
 
 // hanleProcessing hanleProcessing
 func (ic *ICPunks) hanleProcessing(ctx statemachine.Context, ti TaskInfo) error {
+	log.Printf("hanleProcessing ti: %+v", ti)
+
 	ret, err := ic.cmdFuncs(ti.Wallet)
 	if err != nil {
 		return ctx.Send(TaskFailed{})
@@ -74,9 +76,7 @@ func (ic *ICPunks) hanleProcessing(ctx statemachine.Context, ti TaskInfo) error 
 }
 
 func (ic *ICPunks) handleOk(ctx statemachine.Context, ti TaskInfo) error {
-
 	// go reportStatus("work done finished", statOk)
-
 	return ctx.Send(TaskFinished{})
 }
 
