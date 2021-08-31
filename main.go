@@ -311,6 +311,8 @@ nextStep:
 		}
 	}
 
+	tickerOne.Stop()
+
 	temp := []string{}
 	for _, wlt := range wallets {
 		var isIn = false
