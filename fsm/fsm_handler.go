@@ -62,6 +62,17 @@ func (ic *ICPunks) restartTasks(ctx context.Context) error {
 	return nil
 }
 
+// hanleStart hanleStart
+func (ic *ICPunks) hanleStart(ctx statemachine.Context, ti TaskInfo) error {
+	log.Printf("hanleStart ti: %+v", ti)
+
+	return ctx.Send(TaskStart{
+		ID:     ti.ID,
+		IP:     ti.IP,
+		Wallet: ti.Wallet,
+	})
+}
+
 // hanleProcessing hanleProcessing
 func (ic *ICPunks) hanleProcessing(ctx statemachine.Context, ti TaskInfo) error {
 	log.Printf("hanleProcessing ti: %+v", ti)

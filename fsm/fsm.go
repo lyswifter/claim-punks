@@ -11,8 +11,11 @@ import (
 func (ic *ICPunks) Plan(events []statemachine.Event, user interface{}) (interface{}, uint64, error) {
 	next, processed, err := ic.plan(events, user.(*TaskInfo))
 	if err != nil || next == nil {
+		log.Print("HETE")
 		return nil, processed, err
 	}
+
+	log.Printf("next: %+v processed: %v info: %+v", events, processed, user.(*TaskInfo))
 
 	return func(ctx statemachine.Context, si TaskInfo) error {
 		err := next(ctx, si)
@@ -78,6 +81,7 @@ func (ic *ICPunks) plan(events []statemachine.Event, state *TaskInfo) (func(stat
 	case Start:
 		// fallthrough
 		log.Printf("Here Task: %v State: %s", state.ID, state.State)
+		return ic.hanleStart, processed, nil
 	case Processing:
 		log.Printf("Here Processing Task: %v State: %s", state.ID, state.State)
 		return ic.hanleProcessing, processed, nil

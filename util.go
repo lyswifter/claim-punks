@@ -30,7 +30,6 @@ func GetClientIp() (string, error) {
 	}
 
 	for _, address := range addrs {
-		// 检查ip地址判断是否回环地址
 		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
 				return ipnet.IP.String(), nil
@@ -65,8 +64,8 @@ func EnvThing() error {
 	eip := GetExternalIp()
 	ExternalClientIP = eip
 
-	log.Printf("ExternalClientIP: %s", ExternalClientIP)
-	log.Printf("ClientIP: %s", ClientIP)
+	// log.Printf("ExternalClientIP: %s", ExternalClientIP)
+	// log.Printf("ClientIP: %s", ClientIP)
 
 	err = prepareEnv()
 	if err != nil {
