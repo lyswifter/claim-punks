@@ -10,40 +10,12 @@ import (
 	"time"
 )
 
-var wallet_count = 100
-var destTiming = "2021-09-01 20:00:00"
-
 var gdfx = ""
 var home = ""
 
-var dfxjson = "dfx.json"
-var workDir = "Hell"
-var projectName = "Punks"
-
 var wallets = []string{}
-
 var ClientIP string = ""
-
-type ResultPunk struct {
-	IP        string `json:"ip"`
-	Wal       string `json:"wal"`
-	TokenID   string `json:"tokenID"`
-	WalPubkey string `json:"walPubKey"`
-	WalPriKey string `json:"walPriKey"`
-}
-
-type punks struct {
-	Wal  string
-	Data string
-}
-
-type remaining struct {
-	Err error
-	wal string
-}
-
 var PunksInHand = []ResultPunk{}
-
 var output chan punks = make(chan punks, 10)
 var remainChan chan remaining = make(chan remaining, 10)
 
@@ -68,11 +40,14 @@ func main() {
 		}
 	}()
 
-	ip, erra := GetClientIp()
-	if erra != nil {
+	log.Printf("Version: v%s", Version)
+
+	DataStores()
+
+	ip, err := GetClientIp()
+	if err != nil {
 		return
 	}
-	err = erra
 	ClientIP = ip
 
 	err = prepareEnv()
@@ -146,7 +121,6 @@ func prepareEnv() error {
 	}
 
 	gdfx = dfx
-
 	log.Printf("dfx cmd is ok: %s", gdfx)
 	return nil
 }
@@ -206,7 +180,7 @@ func prepareIdentities(wals []string) error {
 		var isExist bool = false
 		for _, str := range strArr {
 			if str == wal {
-				log.Printf("identity(%s) already exist", wal)
+				// log.Printf("identity(%s) already exist", wal)
 				isExist = true
 				break
 			}
@@ -289,7 +263,7 @@ func tigger() error {
 
 	delay := destTime.Sub(time.Now().UTC())
 
-	log.Printf("time is not reached dest: %v nowUtc: %v now: %v delay: %v", destTime, time.Now().UTC(), time.Now(), delay)
+	log.Printf("time is not reached destUtc: %v nowUtc: %v nowCst: %v delay: %v", destTime, time.Now().UTC(), time.Now(), delay)
 
 	timer := time.NewTimer(delay)
 	tickerOne := time.NewTicker(10 * time.Second)
@@ -310,8 +284,12 @@ nextStep:
 			}()
 		}
 	}
-
 	tickerOne.Stop()
+
+	// lis, err := listinfos()
+	// if err != nil {
+	// 	return err
+	// }
 
 	temp := []string{}
 	for _, wlt := range wallets {
@@ -322,11 +300,9 @@ nextStep:
 				break
 			}
 		}
-
 		if isIn {
 			continue
 		}
-
 		temp = append(temp, wlt)
 	}
 
@@ -335,8 +311,7 @@ nextStep:
 		go cmdFunc(wlt)
 	}
 
-	ticker := time.NewTicker(30 * time.Second)
-
+	ticker := time.NewTicker(20 * time.Second)
 loop:
 	for {
 		select {
@@ -358,6 +333,14 @@ loop:
 			}()
 
 			log.Printf("Successfully, wallet: %s, punk: %v", ou.Wal, ou.Data)
+
+			go func() {
+				err := saveinfo(ret)
+				if err != nil {
+					log.Fatalf("writeToLocal: %v err: %s", ret, err.Error())
+					return
+				}
+			}()
 
 			if len(PunksInHand) == len(wallets) {
 				break loop
