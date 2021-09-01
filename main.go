@@ -18,9 +18,9 @@ import (
 // var SecondTiming = "2021-09-01 19:58:00"
 // var ThirdTiming = "2021-09-01 20:00:00"
 
-var FirstTiming = "2021-09-01 05:55:00"
-var SecondTiming = "2021-09-01 05:58:00"
-var ThirdTiming = "2021-09-01 06:00:00"
+var FirstTiming = "2021-09-01 07:40:00"
+var SecondTiming = "2021-09-01 07:43:00"
+var ThirdTiming = "2021-09-01 07:45:00"
 
 func init() {
 	clientsSep()
@@ -65,11 +65,9 @@ func clientsSep() {
 	for _, s := range readline("./clients/first") {
 		command.TimingMap[s] = FirstTiming
 	}
-
 	for _, s := range readline("./clients/second") {
 		command.TimingMap[s] = SecondTiming
 	}
-
 	for _, s := range readline("./clients/third") {
 		command.TimingMap[s] = ThirdTiming
 	}
