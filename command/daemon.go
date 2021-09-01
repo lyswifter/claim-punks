@@ -14,7 +14,7 @@ var DaemonCmd = &cli.Command{
 		&cli.Int64Flag{
 			Name:  "count",
 			Usage: "specify repeat count",
-			Value: 100,
+			Value: 3,
 		},
 		&cli.Int64Flag{
 			Name:  "delta",
@@ -23,8 +23,6 @@ var DaemonCmd = &cli.Command{
 		},
 	},
 	Action: func(cctx *cli.Context) error {
-
-		log.Printf("Version: v%s", Version)
 
 		if cctx.Int64("count") == 0 {
 			return fmt.Errorf("count must not be zero")

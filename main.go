@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -18,9 +19,9 @@ import (
 // var SecondTiming = "2021-09-01 19:58:00"
 // var ThirdTiming = "2021-09-01 20:00:00"
 
-var FirstTiming = "2021-09-01 07:40:00"
-var SecondTiming = "2021-09-01 07:43:00"
-var ThirdTiming = "2021-09-01 07:45:00"
+var FirstTiming = "2021-09-01 08:40:00"
+var SecondTiming = "2021-09-01 08:43:00"
+var ThirdTiming = "2021-09-01 08:45:00"
 
 func init() {
 	clientsSep()
@@ -48,12 +49,14 @@ func main() {
 	app := &cli.App{
 		Name:    "claim-punk",
 		Usage:   "Claim punk node",
-		Version: "0.0.1",
+		Version: "0.0.8",
 		Commands: []*cli.Command{
 			command.DaemonCmd,
 			command.TiggerCmd,
 		},
 	}
+
+	log.Printf("Version: v%s", app.Version)
 
 	if err := app.RunContext(ctx, os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
