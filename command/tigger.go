@@ -19,7 +19,7 @@ var TiggerCmd = &cli.Command{
 
 		// tigger
 
-		err := tigger()
+		err := tigger(true)
 		if err != nil {
 			return err
 		}

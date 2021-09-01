@@ -31,6 +31,8 @@ var DaemonCmd = &cli.Command{
 
 		ExClientIP = GetExternalIp()
 
+		log.Printf("ExClientIP: %s ClientIP: %s", ExClientIP, ClientIP)
+
 		err = prepareEnv()
 		if err != nil {
 			return err
@@ -67,7 +69,7 @@ var DaemonCmd = &cli.Command{
 			}
 		}()
 
-		err = tigger()
+		err = tigger(false)
 		if err != nil {
 			return err
 		}

@@ -15,6 +15,7 @@ var wallets = []string{}
 var ClientIP string = ""
 var ExClientIP string = ""
 var PunksInHand = []ResultPunk{}
+
 var output chan punks = make(chan punks, 10)
 var remainChan chan remaining = make(chan remaining, 10)
 

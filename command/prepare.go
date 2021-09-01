@@ -135,68 +135,97 @@ func prepareIdentities(wals []string) error {
 	return nil
 }
 
-func cmdFunc(wl string) {
+func remainingTokensFunc(wl string) error {
 	start := time.Now()
 	err := os.Chdir(path.Join(home, workDir, projectName))
 	if err != nil {
-		remainChan <- remaining{
-			Err: err,
-			wal: wl,
-		}
-		return
+		return err
 	}
 
-	cmd := exec.Command(gdfx, "--identity", wl, "canister", "--network", "ic", "call", "qcg3w-tyaaa-aaaah-qakea-cai", "name")
+	//claimRandom
+	//remainingTokens
+	cmd := exec.Command(gdfx, "--identity", wl, "canister", "--network", "ic", "call", "3hdbp-uiaaa-aaaah-qau4q-cai", "remainingTokens")
 	fmt.Printf("cmd: %v\n", cmd)
 
-	data, err := cmd.Output()
+	data, err := cmd.CombinedOutput()
 	if err != nil {
-		remainChan <- remaining{
-			Err: err,
-			wal: wl,
-		}
-		log.Fatalf("cmd: %v err: %s", cmd, err.Error())
-		return
+		log.Printf("cmd: %v err: %s", cmd, err.Error())
+		return err
 	}
 
 	output <- punks{
 		Wal:  wl,
 		Data: string(data),
 	}
+
 	log.Printf("cmd %s finished, took: %s", wl, time.Since(start).String())
+	return nil
 }
 
-func tigger() error {
-	// 	timeFormat := "2006-01-02 15:04:05"
-	// 	destTime, err := time.ParseInLocation(timeFormat, destTiming, time.UTC)
-	// 	if err != nil {
-	// 		return err
-	// 	}
+func claimRandomFunc(wl string) error {
+	start := time.Now()
+	err := os.Chdir(path.Join(home, workDir, projectName))
+	if err != nil {
+		return err
+	}
 
-	// 	delay := destTime.Sub(time.Now().UTC())
+	//claimRandom
+	//remainingTokens
+	cmd := exec.Command(gdfx, "--identity", wl, "canister", "--network", "ic", "call", "3hdbp-uiaaa-aaaah-qau4q-cai", "claimRandom")
 
-	// 	log.Printf("time is not reached destUtc: %v nowUtc: %v nowCst: %v delay: %v", destTime, time.Now().UTC(), time.Now(), delay)
+	data, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("cmd: %v err: %s", cmd, err.Error())
+		return err
+	}
 
-	// 	timer := time.NewTimer(delay)
-	// 	tickerOne := time.NewTicker(10 * time.Second)
+	output <- punks{
+		Wal:  wl,
+		Data: string(data),
+	}
 
-	// nextStep:
-	// 	for {
-	// 		select {
-	// 		case <-timer.C:
-	// 			log.Printf("It's time now to do sth")
-	// 			break nextStep
-	// 		case <-tickerOne.C:
-	// 			go func() error {
-	// 				err := reportStatus("waiting time", statOk)
-	// 				if err != nil {
-	// 					return err
-	// 				}
-	// 				return nil
-	// 			}()
-	// 		}
-	// 	}
-	// 	tickerOne.Stop()
+	log.Printf("cmd %s finished, took: %s", wl, time.Since(start).String())
+	return nil
+}
+
+func tigger(startNow bool) error {
+
+	if !startNow {
+		var specifyTiming = DestTiming
+		if val, ok := TimingMap[ExClientIP]; ok {
+			specifyTiming = val
+		}
+
+		timeFormat := "2006-01-02 15:04:05"
+		destTime, err := time.ParseInLocation(timeFormat, specifyTiming, time.UTC)
+		if err != nil {
+			return err
+		}
+
+		delay := destTime.Sub(time.Now().UTC())
+		log.Printf("Timing is not reach specUtc: %v nowUtc: %v nowCst: %v delay: %v", destTime, time.Now().UTC(), time.Now(), delay)
+
+		timer := time.NewTimer(delay)
+		tickerOne := time.NewTicker(20 * time.Second)
+
+	nextStep:
+		for {
+			select {
+			case <-timer.C:
+				log.Printf("It's time now to do sth")
+				break nextStep
+			case <-tickerOne.C:
+				go func() error {
+					err := reportStatus("waiting time", statOk)
+					if err != nil {
+						return err
+					}
+					return nil
+				}()
+			}
+		}
+		tickerOne.Stop()
+	}
 
 	temp := []string{}
 	for _, wlt := range wallets {
@@ -214,8 +243,7 @@ func tigger() error {
 	}
 
 	for _, wlt := range temp {
-		// go Retry(100, 10*time.Millisecond, cmdFunc, wal)
-		go cmdFunc(wlt)
+		go Retry(100, 50*time.Millisecond, claimRandomFunc, wlt)
 	}
 
 	ticker := time.NewTicker(20 * time.Second)
@@ -228,8 +256,6 @@ loop:
 				Wal:     ou.Wal,
 				TokenID: ou.Data,
 			}
-
-			log.Printf("ret: %v", ret)
 
 			PunksInHand = append(PunksInHand, ret)
 
@@ -267,8 +293,6 @@ loop:
 	}
 
 	ticker.Stop()
-
 	log.Println("all finished")
-
 	return nil
 }
