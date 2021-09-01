@@ -9,7 +9,7 @@ import (
 
 var DaemonCmd = &cli.Command{
 	Name:  "daemon",
-	Usage: "Start an claim-punk daemon",
+	Usage: "Start a claim-punk daemon",
 	Flags: []cli.Flag{
 		&cli.Int64Flag{
 			Name:  "count",
@@ -24,6 +24,8 @@ var DaemonCmd = &cli.Command{
 	},
 	Action: func(cctx *cli.Context) error {
 
+		log.Printf("Version: v%s", Version)
+
 		if cctx.Int64("count") == 0 {
 			return fmt.Errorf("count must not be zero")
 		}
@@ -31,8 +33,6 @@ var DaemonCmd = &cli.Command{
 		if cctx.Int64("delta") == 0 {
 			return fmt.Errorf("delta must not be zero")
 		}
-
-		log.Printf("Version: v%s", Version)
 
 		DataStores()
 

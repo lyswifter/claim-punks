@@ -7,13 +7,16 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-const Version = "0.0.5"
+const Version = "0.0.7"
 
 var gdfx = ""
 var home = ""
+
 var wallets = []string{}
+
 var ClientIP string = ""
 var ExClientIP string = ""
+
 var PunksInHand = []ResultPunk{}
 
 var output chan punks = make(chan punks, 10)
