@@ -8,7 +8,7 @@ import (
 
 var TiggerCmd = &cli.Command{
 	Name:  "tigger",
-	Usage: "Start an indexer daemon, accepting http requests",
+	Usage: "Tigger claim process with specify count and delta",
 	Flags: []cli.Flag{
 		&cli.Int64Flag{
 			Name:  "count",
