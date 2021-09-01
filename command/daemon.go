@@ -5,6 +5,7 @@ import (
 	"log"
 
 	cli "github.com/urfave/cli/v2"
+	"golang.org/x/xerrors"
 )
 
 var DaemonCmd = &cli.Command{
@@ -34,11 +35,25 @@ var DaemonCmd = &cli.Command{
 
 		DataStores()
 
-		ExClientIP = GetExternalIp()
-		ClientIP = ExClientIP
+		eip, err := getCacheExternalIp()
+		if err != nil || eip == "" {
+			eip = GetExternalIp()
+		}
+
+		if eip == "" {
+			return xerrors.Errorf("eip is empty")
+		}
+
+		ExClientIP = eip
+		ClientIP = eip
 		log.Printf("ExClientIP: %s", ExClientIP)
 
-		err := prepareEnv()
+		err = saveExternalIp(ExClientIP)
+		if err != nil {
+			return err
+		}
+
+		err = prepareEnv()
 		if err != nil {
 			return err
 		}

@@ -120,3 +120,34 @@ func listinfos() ([]ResultPunk, error) {
 
 	return infos, nil
 }
+
+func saveExternalIp(ip string) error {
+	key := datastore.NewKey("external-ip")
+
+	ishas, err := DB.Has(key)
+	if err != nil {
+		return err
+	}
+
+	if ishas {
+		return nil
+	}
+
+	err = DB.Put(key, []byte(ip))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getCacheExternalIp() (string, error) {
+	key := datastore.NewKey("external-ip")
+
+	data, err := DB.Get(key)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
