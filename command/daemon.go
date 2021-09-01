@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"log"
 
 	cli "github.com/urfave/cli/v2"
@@ -8,16 +9,28 @@ import (
 
 var DaemonCmd = &cli.Command{
 	Name:  "daemon",
-	Usage: "Start an indexer daemon, accepting http requests",
+	Usage: "Start an claim-punk daemon",
 	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:     "disablep2p",
-			Usage:    "Disable libp2p client api for indexer",
-			Value:    false,
-			Required: false,
+		&cli.Int64Flag{
+			Name:  "count",
+			Usage: "specify repeat count",
+			Value: 100,
+		},
+		&cli.Int64Flag{
+			Name:  "delta",
+			Usage: "specify repeat time interval",
+			Value: 50,
 		},
 	},
 	Action: func(cctx *cli.Context) error {
+
+		if cctx.Int64("count") == 0 {
+			return fmt.Errorf("count must not be zero")
+		}
+
+		if cctx.Int64("delta") == 0 {
+			return fmt.Errorf("delta must not be zero")
+		}
 
 		log.Printf("Version: v%s", Version)
 
@@ -69,7 +82,7 @@ var DaemonCmd = &cli.Command{
 			}
 		}()
 
-		err = tigger(false)
+		err = tigger(false, cctx.Int64("count"), int(cctx.Int64("delta")))
 		if err != nil {
 			return err
 		}

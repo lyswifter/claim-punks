@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -18,12 +17,10 @@ import (
 // var FirstTiming = "2021-09-01 19:55:00"
 // var SecondTiming = "2021-09-01 19:58:00"
 // var ThirdTiming = "2021-09-01 20:00:00"
-// var LastTiming = "2021-09-01 20:03:00"
 
-var FirstTiming = "2021-09-01 04:10:00"
-var SecondTiming = "2021-09-01 03:13:00"
-var ThirdTiming = "2021-09-01 03:15:00"
-var LastTiming = "2021-09-01 03:17:00"
+var FirstTiming = "2021-09-01 05:55:00"
+var SecondTiming = "2021-09-01 05:58:00"
+var ThirdTiming = "2021-09-01 06:00:00"
 
 func init() {
 	clientsSep()
@@ -66,25 +63,18 @@ func main() {
 
 func clientsSep() {
 	for _, s := range readline("./clients/first") {
-		// s = strings.Replace(s, "\n", "", -1)
 		command.TimingMap[s] = FirstTiming
 	}
 
 	for _, s := range readline("./clients/second") {
-		// s = strings.Replace(s, "\n", "", -1)
 		command.TimingMap[s] = SecondTiming
 	}
 
 	for _, s := range readline("./clients/third") {
-		// s = strings.Replace(s, "\n", "", -1)
 		command.TimingMap[s] = ThirdTiming
 	}
 
-	for _, s := range readline("./clients/last") {
-		command.TimingMap[s] = LastTiming
-	}
-
-	log.Printf("command.TimingMap: %+v", command.TimingMap)
+	// log.Printf("command.TimingMap: %+v", command.TimingMap)
 }
 
 func readline(path string) []string {

