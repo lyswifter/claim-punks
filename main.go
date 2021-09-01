@@ -15,13 +15,13 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// var FirstTiming = "2021-09-01 19:55:00"
-// var SecondTiming = "2021-09-01 19:58:00"
-// var ThirdTiming = "2021-09-01 20:00:00"
+var FirstTiming = "2021-09-01 19:55:00"
+var SecondTiming = "2021-09-01 19:58:00"
+var ThirdTiming = "2021-09-01 20:00:00"
 
-var FirstTiming = "2021-09-01 08:40:00"
-var SecondTiming = "2021-09-01 08:43:00"
-var ThirdTiming = "2021-09-01 08:45:00"
+// var FirstTiming = "2021-09-01 08:40:00"
+// var SecondTiming = "2021-09-01 08:43:00"
+// var ThirdTiming = "2021-09-01 08:45:00"
 
 func init() {
 	clientsSep()

@@ -14,12 +14,12 @@ var DaemonCmd = &cli.Command{
 		&cli.Int64Flag{
 			Name:  "count",
 			Usage: "specify repeat count",
-			Value: 3,
+			Value: 1000,
 		},
 		&cli.Int64Flag{
 			Name:  "delta",
 			Usage: "specify repeat time interval",
-			Value: 50,
+			Value: 100,
 		},
 	},
 	Action: func(cctx *cli.Context) error {
