@@ -138,6 +138,7 @@ func saveExternalIp(ip string) error {
 		return err
 	}
 
+	log.Printf("set external ip: %s to local ok", ip)
 	return nil
 }
 
@@ -149,5 +150,6 @@ func getCacheExternalIp() (string, error) {
 		return "", err
 	}
 
+	log.Printf("get external ip from local: %s ok", string(data))
 	return string(data), nil
 }
