@@ -162,42 +162,42 @@ func claimRandomFunc(wl string) error {
 
 func tigger(startNow bool, count int64, delta int) error {
 
-	if !startNow {
-		var specifyTiming = DestTiming
-		if val, ok := TimingMap[ExClientIP]; ok {
-			specifyTiming = val
-		}
+	// if !startNow {
+	// 	var specifyTiming = DestTiming
+	// 	if val, ok := TimingMap[ExClientIP]; ok {
+	// 		specifyTiming = val
+	// 	}
 
-		timeFormat := "2006-01-02 15:04:05"
-		destTime, err := time.ParseInLocation(timeFormat, specifyTiming, time.UTC)
-		if err != nil {
-			return err
-		}
+	// 	timeFormat := "2006-01-02 15:04:05"
+	// 	destTime, err := time.ParseInLocation(timeFormat, specifyTiming, time.UTC)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		delay := destTime.Sub(time.Now().UTC())
-		log.Printf("Timing is not reach specUtc: %v nowUtc: %v nowCst: %v delay: %v", destTime, time.Now().UTC(), time.Now(), delay)
+	// 	delay := destTime.Sub(time.Now().UTC())
+	// 	log.Printf("Timing is not reach specUtc: %v nowUtc: %v nowCst: %v delay: %v", destTime, time.Now().UTC(), time.Now(), delay)
 
-		timer := time.NewTimer(delay)
-		tickerOne := time.NewTicker(20 * time.Second)
+	// 	timer := time.NewTimer(delay)
+	// 	tickerOne := time.NewTicker(20 * time.Second)
 
-	nextStep:
-		for {
-			select {
-			case <-timer.C:
-				log.Printf("Now, It's time to do sth...")
-				break nextStep
-			case <-tickerOne.C:
-				go func() error {
-					err := reportStatus("waiting time", statOk)
-					if err != nil {
-						return err
-					}
-					return nil
-				}()
-			}
-		}
-		tickerOne.Stop()
-	}
+	// nextStep:
+	// 	for {
+	// 		select {
+	// 		case <-timer.C:
+	// 			log.Printf("Now, It's time to do sth...")
+	// 			break nextStep
+	// 		case <-tickerOne.C:
+	// 			go func() error {
+	// 				err := reportStatus("waiting time", statOk)
+	// 				if err != nil {
+	// 					return err
+	// 				}
+	// 				return nil
+	// 			}()
+	// 		}
+	// 	}
+	// 	tickerOne.Stop()
+	// }
 
 	temp := []string{}
 	for _, wlt := range wallets {
@@ -230,6 +230,8 @@ loop:
 			}
 
 			PunksInHand = append(PunksInHand, ret)
+
+			log.Printf("ret: %+v", ret)
 
 			go func() {
 				err := reportResult(ret)
