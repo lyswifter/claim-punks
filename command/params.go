@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-const Version = "0.0.3"
+const Version = "0.0.4"
 
 var gdfx = ""
 var home = ""
