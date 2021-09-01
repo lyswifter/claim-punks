@@ -36,17 +36,11 @@ var DaemonCmd = &cli.Command{
 
 		DataStores()
 
-		ip, err := GetClientIp()
-		if err != nil {
-			return err
-		}
-		ClientIP = ip
-
 		ExClientIP = GetExternalIp()
+		ClientIP = ExClientIP
+		log.Printf("ExClientIP: %s", ExClientIP)
 
-		log.Printf("ExClientIP: %s ClientIP: %s", ExClientIP, ClientIP)
-
-		err = prepareEnv()
+		err := prepareEnv()
 		if err != nil {
 			return err
 		}
