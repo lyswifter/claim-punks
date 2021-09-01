@@ -49,7 +49,7 @@ func main() {
 	app := &cli.App{
 		Name:    "claim-punk",
 		Usage:   "Claim punk node",
-		Version: "0.0.8",
+		Version: "0.0.9",
 		Commands: []*cli.Command{
 			command.DaemonCmd,
 			command.TiggerCmd,
